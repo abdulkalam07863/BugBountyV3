@@ -1,0 +1,914 @@
+<!doctype html><html lang="en"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BountyHunter · console</title>
+<style>
+:root{--bg:#0b0e13;--pan:#10151d;--pan2:#151b24;--pan3:#1a212c;--line:#1e2632;--line2:#2c3849;
+--tx:#e6edf6;--dim:#93a3b8;--mute:#63748b;--ac:#4c8dff;--ok:#35d39a;--warn:#f5b544;
+--bad:#ff5c7a;--cash:#16e0a8;--vio:#9b7bff}
+*{box-sizing:border-box}html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--tx);font:15.5px/1.55 ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif;display:grid;grid-template-rows:auto auto 1fr;overflow:hidden}
+.num{font-variant-numeric:tabular-nums}.mono{font-family:ui-monospace,Consolas,monospace}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:var(--pan2);border:1px solid var(--line);border-radius:6px;padding:8px 13px;font-weight:600;cursor:pointer}
+button:hover:not(:disabled){background:var(--pan3);border-color:var(--line2)}
+button:disabled{opacity:.35;cursor:not-allowed}
+button.pri{background:#173a6b;border-color:#2b62ad;color:#dceaff}
+button.dan{background:#3a1622;border-color:#7d2f45;color:#ffdbe3}
+button.gh{background:transparent}
+button.on{background:#0d2f26;border-color:#146b53;color:var(--ok)}
+:focus-visible{outline:2px solid var(--ac);outline-offset:1px}
+#top{display:flex;gap:9px;align-items:center;padding:11px 18px;border-bottom:1px solid var(--line);background:var(--pan);flex-wrap:wrap}
+#brand{display:flex;align-items:center;gap:10px;margin-right:14px}
+#dot{width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok)}
+#dot.bad{background:var(--bad);box-shadow:0 0 8px var(--bad)}
+#brand b{font-size:16px;letter-spacing:.16em;font-weight:800}
+#brand small{color:var(--mute);font-size:12px;letter-spacing:.08em;display:block}
+#q{flex:1;min-width:250px;max-width:540px;background:var(--pan2);border:1px solid var(--line);border-radius:6px;padding:10px 14px;font-size:14.5px}
+.sp{flex:1}
+#hchip{font-size:12.5px;letter-spacing:.06em;color:var(--mute);border:1px solid var(--line);border-radius:999px;padding:5px 12px;white-space:nowrap}
+#hchip.warn{color:var(--warn);border-color:#6b4d13}#hchip.bad{color:var(--bad);border-color:#7d2f45}
+#kpi{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--line);border-bottom:1px solid var(--line)}
+.k{background:var(--pan);padding:11px 16px;position:relative;overflow:hidden}
+.k b{display:block;font-size:27px;line-height:1.15;font-weight:700}
+.k span{font-size:11.5px;letter-spacing:.1em;color:var(--mute);text-transform:uppercase}
+.k.c b{color:var(--bad)}.k.h b{color:var(--warn)}.k.r b{color:var(--ok)}.k.m b{color:var(--cash)}
+.k i{position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--line2)}
+.k.c i{background:var(--bad)}.k.h i{background:var(--warn)}
+.k.r i{background:var(--ok)}.k.m i{background:var(--cash)}
+#body{display:grid;grid-template-columns:348px 1fr;min-height:0}
+#rail{border-right:1px solid var(--line);display:flex;flex-direction:column;background:var(--pan);min-height:0}
+#rsearch{padding:9px;border-bottom:1px solid var(--line)}
+#rsearch input{width:100%;background:var(--pan2);border:1px solid var(--line);border-radius:6px;padding:8px 11px;font-size:13.5px}
+#rfilt{display:flex;gap:5px;flex-wrap:wrap;padding:9px;border-bottom:1px solid var(--line)}
+#rfilt button{padding:5px 11px;font-size:12.5px;border-radius:999px;background:transparent;color:var(--dim);border-color:transparent;font-weight:600}
+#rfilt button.on{background:#173a6b;border-color:#2b62ad;color:#dceaff}
+#list{flex:1;overflow:auto;min-height:0}
+.t{padding:11px 13px;border-bottom:1px solid #151b24;cursor:pointer;border-left:3px solid transparent}
+.t:hover{background:var(--pan2)}.t.sel{background:#132030;border-left-color:var(--ac)}
+.t .n{font-weight:650;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t .u{color:var(--mute);font-size:12px;font-family:ui-monospace,Consolas,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t .b{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;align-items:center}
+.pill{font-size:11.5px;padding:2px 8px;border-radius:4px;border:1px solid var(--line);background:var(--pan3);color:var(--dim);letter-spacing:.03em;font-weight:600}
+.pill.live{color:var(--ac);border-color:#2b62ad;background:#12283f}
+.pill.cash{color:var(--cash);border-color:#0c6f54;background:#06211b}
+.pill.rdy{color:var(--ok);border-color:#146b53;background:#07231c}
+.pill.bad{color:var(--bad);border-color:#7d2f45;background:#1e0e14}
+.pill.warn{color:var(--warn);border-color:#6b4d13;background:#1f1707}
+.pill.mut{color:var(--vio);border-color:#453a80;background:#191233}
+.bar{height:3px;background:var(--line);margin-top:7px;border-radius:2px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--ac)}
+#main{display:flex;flex-direction:column;min-width:0;min-height:0}
+#ph{padding:14px 20px;border-bottom:1px solid var(--line);background:var(--pan)}
+#ph h1{margin:0;font-size:21px;font-weight:700}
+#ph .u{color:var(--mute);font-size:13px;font-family:ui-monospace,Consolas,monospace;word-break:break-all;margin-top:3px}
+#acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+#acts button,#acts select{padding:6px 12px;font-size:13px}
+#tabs{display:flex;border-bottom:1px solid var(--line);background:var(--pan2);overflow-x:auto;scrollbar-width:thin}
+#tabs button{border:0;border-right:1px solid var(--line);border-radius:0;background:transparent;padding:11px 16px;font-size:13.5px;color:var(--dim);white-space:nowrap;font-weight:600}
+#tabs button.on{color:var(--ac);background:var(--pan);box-shadow:inset 0 -2px 0 var(--ac)}
+#view{flex:1;overflow:auto;padding:18px 20px;min-height:0}
+#dock{border-top:1px solid var(--line);background:#080b10;display:flex;flex-direction:column;height:210px;flex:none}
+#dock.min{height:34px}
+#dh{display:flex;gap:9px;align-items:center;padding:6px 14px;border-bottom:1px solid var(--line);background:var(--pan);font-size:12.5px;color:var(--mute)}
+#dh b{color:var(--vio);font-family:ui-monospace,Consolas,monospace;font-size:12.5px}
+#dh input{flex:1;max-width:240px;background:var(--pan2);border:1px solid var(--line);border-radius:5px;padding:4px 9px;font-size:12.5px}
+#dh button{padding:4px 9px;font-size:12px}
+#dlog{flex:1;overflow:auto;padding:7px 14px;font:12.5px/1.65 ui-monospace,Consolas,monospace}
+#dlog .ln{white-space:pre-wrap;word-break:break-word}
+#dlog .ts{color:#3d4959}#dlog .e{color:var(--bad)}#dlog .w{color:var(--warn)}
+h2{font-size:12.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--mute);margin:0 0 12px;font-weight:700}
+.card{border:1px solid var(--line);border-radius:8px;padding:15px 17px;margin-bottom:11px;background:var(--pan)}
+.card.warn{border-color:#6b4d13;background:#191307}
+.card.bad{border-color:#7d2f45;background:#1c0e13}
+.card.ok{border-color:#146b53;background:#07231c}
+.card>b{font-size:14.5px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:9px;margin-bottom:11px}
+.st{border:1px solid var(--line);border-radius:8px;padding:12px 15px;background:var(--pan)}
+.st b{display:block;font-size:24px}
+.st span{font-size:11.5px;letter-spacing:.09em;color:var(--mute);text-transform:uppercase}
+.row{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:11px}
+.hint{color:var(--dim);font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{border-bottom:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+th{color:var(--mute);font-size:11.5px;text-transform:uppercase;letter-spacing:.09em;position:sticky;top:0;background:var(--pan);z-index:1}
+th.s{cursor:pointer;user-select:none}th.s:hover{color:var(--tx)}
+tr:hover td{background:#12181f}
+.sev{font-weight:800;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase}
+.sv-critical{color:var(--bad)}.sv-high{color:var(--warn)}.sv-medium{color:#e8d44d}
+.sv-low{color:var(--ok)}.sv-info{color:var(--mute)}
+.chip{display:inline-block;font-size:12px;padding:2px 8px;border-radius:4px;border:1px solid var(--line);background:var(--pan3);margin:0 3px 3px 0}
+.chip.bad{color:var(--bad);border-color:#7d2f45}.chip.ok{color:var(--ok);border-color:#146b53}
+.chip.cash{color:var(--cash);border-color:#0c6f54}.chip.mut{color:var(--vio);border-color:#453a80}
+.sbar{height:5px;background:var(--line);border-radius:2px;overflow:hidden;width:66px;display:inline-block;vertical-align:middle}
+.sbar>i{display:block;height:100%;background:var(--ac)}
+.ring{width:104px;height:104px;border-radius:50%;display:grid;place-items:center;flex:none;background:conic-gradient(var(--ok) 0deg,var(--line) 0deg)}
+.ring i{width:80px;height:80px;border-radius:50%;background:var(--pan);display:grid;place-items:center;font-style:normal;font-size:22px;font-weight:700}
+pre.rep{font:12.5px/1.7 ui-monospace,Consolas,monospace;white-space:pre-wrap;background:#070a0e;border:1px solid var(--line);border-radius:8px;padding:15px}
+textarea{width:100%;background:#070a0e;border:1px solid var(--line);border-radius:6px;padding:9px;font:12.5px ui-monospace,Consolas,monospace;resize:vertical}
+.empty{padding:38px 22px;text-align:center;color:var(--mute);font-size:13.5px;border:1px dashed var(--line);border-radius:8px}
+.lvl{display:flex;gap:11px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.lvl .n{width:29px;height:29px;border-radius:6px;display:grid;place-items:center;font-size:12.5px;font-weight:800;background:var(--pan3);border:1px solid var(--line);flex:none}
+.lvl.off{opacity:.4}.lvl .x{flex:1;min-width:0}
+.lvl .x b{display:block;font-size:14px}.lvl .x span{font-size:12.5px;color:var(--mute)}
+#toast{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:7px;z-index:60}
+.to{background:var(--pan3);border:1px solid var(--line2);border-left:3px solid var(--ac);padding:11px 15px;border-radius:6px;font-size:13.5px;max-width:370px;box-shadow:0 8px 26px rgba(0,0,0,.6)}
+.to.bad{border-left-color:var(--bad)}
+#lost{display:none;padding:7px 18px;background:#2a1017;border-bottom:1px solid #7d2f45;color:#ffdbe3;font-size:13px}
+#lost.on{display:block}
+#scrim{position:fixed;inset:0;background:rgba(4,7,11,.78);display:none;z-index:80;align-items:flex-start;justify-content:center;padding:28px 16px;overflow:auto}
+#scrim.on{display:flex}
+#modal{width:100%;max-width:800px;background:var(--pan);border:1px solid var(--line2);border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.7)}
+#mh{display:flex;align-items:center;gap:10px;padding:15px 20px;border-bottom:1px solid var(--line)}
+#mh b{font-size:15.5px;letter-spacing:.04em}
+#mb{padding:18px 20px}
+#mf{display:flex;gap:9px;justify-content:flex-end;padding:15px 20px;border-top:1px solid var(--line);position:sticky;bottom:0;background:var(--pan)}
+.fld{margin-bottom:13px}
+.fld label{display:block;font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--mute);margin-bottom:5px;font-weight:700}
+.fld input,.fld select,.fld textarea{width:100%;background:var(--pan2);border:1px solid var(--line);border-radius:6px;padding:9px 11px;font-size:14px}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--ac)}
+.fld .hint{margin-top:4px;font-size:12.5px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+.presets{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:13px}
+.presets button{padding:6px 13px;font-size:13px}
+.err{color:var(--bad);font-size:13px;margin-bottom:9px}
+#prev{border:1px solid var(--line);border-radius:6px;padding:11px 13px;background:#070a0e;font-size:12.5px;font-family:ui-monospace,Consolas,monospace;white-space:pre-wrap;max-height:190px;overflow:auto}
+</style>
+
+<div id="top">
+  <div id="brand"><span id="dot"></span><div><b>BOUNTYHUNTER</b><small>follow the money</small></div></div>
+  <input id="q" placeholder="program url or owner/repo  ·  press /" autocomplete="off" spellcheck="false">
+  <button class="pri" id="add">queue</button>
+  <button id="newman">+ manual</button>
+  <button id="disc">discover</button>
+  <button class="pri" id="all">attack all</button>
+  <button class="dan" id="stop">stop</button>
+  <button class="gh" id="purgeall">purge</button>
+  <span class="sp"></span>
+  <button class="gh" id="fund">fund only</button>
+  <span id="hchip">—</span>
+</div>
+
+<div id="kpi">
+  <div class="k"><b id="k1" class="num">0</b><span>targets</span><i></i></div>
+  <div class="k"><b id="k2" class="num">0</b><span>running</span><i></i></div>
+  <div class="k m"><b id="k3" class="num">0</b><span>fund</span><i></i></div>
+  <div class="k c"><b id="k4" class="num">0</b><span>critical</span><i></i></div>
+  <div class="k h"><b id="k5" class="num">0</b><span>high</span><i></i></div>
+  <div class="k r"><b id="k6" class="num">0</b><span>ready</span><i></i></div>
+  <div class="k"><b id="k7" class="num">0</b><span>methods</span><i></i></div>
+  <div class="k"><b id="k8" class="num">0%</b><span>avg ready</span><i></i></div>
+</div>
+
+<div id="lost">connection to the engine lost — retrying</div>
+
+<div id="body">
+  <div id="rail">
+    <div id="rsearch"><input id="rs" placeholder="filter targets" autocomplete="off"></div>
+    <div id="rfilt">
+      <button class="on" data-f="all">all</button><button data-f="manual">manual</button>
+      <button data-f="cash">money</button><button data-f="live">live</button>
+      <button data-f="ready">ready</button><button data-f="hits">findings</button>
+      <button data-f="nodet">no details</button><button data-f="un">untyped</button>
+      <button data-f="web">web</button>
+    </div>
+    <div id="list"></div>
+  </div>
+  <div id="main">
+    <div id="ph">
+      <h1 id="pn">no target selected</h1>
+      <div class="u" id="pu">pick a target on the left, queue one above, or use + manual</div>
+      <div id="acts"></div>
+    </div>
+    <div id="tabs"></div>
+    <div id="view"><div class="empty">select a target</div></div>
+    <div id="dock">
+      <div id="dh"><b id="dn">-</b><input id="dfilter" placeholder="grep log" autocomplete="off">
+        <button id="dpause">pause</button><button id="derr" class="gh">errors</button>
+        <span class="sp"></span><button id="ddl" class="gh">download</button>
+        <button id="dmin" class="gh">collapse</button></div>
+      <div id="dlog"></div>
+    </div>
+  </div>
+</div>
+
+<div id="scrim"><div id="modal">
+  <div id="mh"><b id="mtitle">manual program</b><span class="sp"></span>
+    <button class="gh" id="mx">close</button></div>
+  <div id="mb">
+    <div class="presets" id="presets"></div>
+    <div id="merr" class="err"></div>
+    <div class="fld"><label>paste program page (optional)</label>
+      <textarea id="mparse" rows="4" placeholder="drop the brief here and press parse"></textarea>
+      <div class="row" style="margin:7px 0 0"><button id="mparsebtn">parse into form</button></div>
+    </div>
+    <div class="two">
+      <div class="fld"><label>name *</label><input id="mname" maxlength="80"></div>
+      <div class="fld"><label>url</label><input id="murl" placeholder="https:// or repo or address"></div>
+    </div>
+    <div class="three">
+      <div class="fld"><label>type</label><select id="mtype">
+        <option value="unknown">unknown</option><option value="solidity">solidity</option>
+        <option value="rust">rust</option><option value="go">go</option><option value="python">python</option>
+        <option value="js">js</option><option value="php">php</option><option value="ruby">ruby</option>
+        <option value="java">java</option><option value="c">c</option><option value="web">web</option>
+      </select></div>
+      <div class="fld"><label>max bounty $</label><input id="mmax" type="number" min="0" step="500"></div>
+      <div class="fld"><label>rank 1-100</label><input id="mrank" type="number" min="1" max="100" value="60"></div>
+    </div>
+    <div class="fld"><label>scope assets * — one per line</label>
+      <textarea id="mscope" rows="5" placeholder="0xabc…&#10;github.com/org/repo&#10;app.example.com"></textarea>
+      <div class="hint">addresses, repo urls and hosts. addresses drive the value census.</div>
+    </div>
+    <div class="fld"><label>severity tiers</label>
+      <div class="three">
+        <input id="tc" placeholder="critical max" type="number" min="0">
+        <input id="th" placeholder="high max" type="number" min="0">
+        <input id="tm" placeholder="medium max" type="number" min="0">
+      </div>
+      <div class="three" style="margin-top:9px">
+        <input id="tl" placeholder="low max" type="number" min="0">
+        <input id="ti" placeholder="info max" type="number" min="0"><span></span>
+      </div>
+    </div>
+    <div class="three">
+      <div class="fld"><label>poc</label><select id="mpoc">
+        <option value="1">required</option><option value="0">optional</option></select></div>
+      <div class="fld"><label>channel</label><select id="mchan">
+        <option value="">unknown</option><option value="email">email</option>
+        <option value="form">form</option><option value="platform">platform</option>
+        <option value="other">other</option></select></div>
+      <div class="fld"><label>address</label><input id="maddr"></div>
+    </div>
+    <div class="fld"><label>exclusions — one per line</label>
+      <textarea id="mexcl" rows="3"></textarea></div>
+    <div class="fld"><label>notes</label><textarea id="mnotes" rows="2"></textarea></div>
+    <div class="fld"><label>preview</label><div id="prev">nothing parsed yet</div></div>
+  </div>
+  <div id="mf">
+    <button class="gh" id="mdraft">save draft</button>
+    <button class="gh" id="mbulk">bulk paste</button>
+    <button class="pri" id="msave">save and queue</button>
+  </div>
+</div></div>
+
+<div id="toast"></div>
+
+<script>
+"use strict";
+const TABS = ["board","overview","value","contract","plan","findings","readiness","report",
+              "methods","discovery","repairs","health"];
+const $ = s => document.querySelector(s);
+const esc = v => (v ?? "").toString().replace(/[&<>"']/g,
+  c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let S = null, SEL = 0, TAB = "board", FILT = "all", TERM = "", FSEV = "all",
+    FSORT = {k:"score", d:-1}, SINCE = 0, PAUSE = false, ERRS = false, BUSY = false,
+    FAILS = 0, SIGHASH = "", DOCK = true, MPID = 0, TOOLS = null;
+
+function to(m, bad){ const d = document.createElement("div");
+  d.className = "to" + (bad ? " bad" : ""); d.textContent = m;
+  $("#toast").appendChild(d); setTimeout(() => d.remove(), 3600); }
+
+async function api(p, o){
+  const c = new AbortController(); const t = setTimeout(() => c.abort(), 12000);
+  try{
+    const r = await fetch(p, {...(o||{}), signal:c.signal});
+    if (!r.ok){ let j = null; try{ j = await r.json(); }catch{}
+      throw new Error((j && (j.msg || (j.errors||[])[0])) || ("HTTP " + r.status)); }
+    return await r.json();
+  } finally { clearTimeout(t); }
+}
+const get = p => api(p).catch(() => null);
+const post = (p, b) => api(p, {method:"POST", headers:{"Content-Type":"application/json"},
+  body:JSON.stringify(b||{})});
+
+async function poll(){
+  if (BUSY) return; BUSY = true;
+  try{
+    const s = await api("/api/state");
+    FAILS = 0; $("#lost").classList.remove("on"); $("#dot").classList.remove("bad");
+    const h = JSON.stringify([s.tally, s.running, s.fund, s.stopped,
+      s.projects.map(p => [p.id,p.status,p.stage,p.attempts,p.escalation,p.readiness,
+        p.hits,p.fund,p.ready,p.unjudged,p.manual,p.live])]);
+    const ch = h !== SIGHASH; S = s; SIGHASH = h;
+    kpi(); rail(); head(); health();
+    if (ch) await render();
+    await pullLog();
+  }catch(e){ if (++FAILS >= 3){ $("#lost").classList.add("on"); $("#dot").classList.add("bad"); } }
+  finally{ BUSY = false; }
+}
+
+function kpi(){
+  const t = (S && S.tally) || {};
+  const ready = (S.projects||[]).reduce((a,p) => a + (p.ready||0), 0);
+  const avg = S.projects.length ? Math.round(S.projects.reduce((a,p) => a +
+    (p.readiness||0), 0) / S.projects.length) : 0;
+  $("#k1").textContent = S.projects.length; $("#k2").textContent = S.running;
+  $("#k3").textContent = S.fund||0; $("#k4").textContent = t.critical||0;
+  $("#k5").textContent = t.high||0; $("#k6").textContent = ready;
+  $("#k7").textContent = S.tools; $("#k8").textContent = avg + "%";
+  $("#fund").classList.toggle("on", !!S.fund_only);
+}
+function health(){
+  const c = $("#hchip"); if (!S) return;
+  const b = [`${S.workers}w`, `${S.tools} methods`, `thr ${S.threshold}`];
+  if (S.auto_discover) b.push("discovery");
+  if (S.fund_only) b.push("FUND ONLY");
+  if (S.stopped) b.push("STOPPED");
+  c.textContent = b.join(" · ");
+  c.className = S.stopped ? "bad" : (S.fund_only ? "warn" : "");
+}
+const pill = (t, c) => `<span class="pill ${c||""}">${esc(t)}</span>`;
+
+function row(p){
+  const g = [p.manual ? pill("manual","mut") : "",
+    p.toolchain === "unknown" ? pill("untyped","bad") : pill(p.toolchain),
+    p.details_ok ? "" : pill("no details","warn"),
+    p.web ? pill("app","live") : "", p.fund ? pill(p.fund + " fund","cash") : "",
+    p.live ? pill("live","live") : "", p.ready ? pill(p.ready + " ready","rdy") : "",
+    p.hits ? pill(p.hits + " hit") : "", pill("L" + p.escalation),
+    pill(p.status, p.status === "failed" ? "bad" : "")].join("");
+  return `<div class="t ${p.id === SEL ? "sel" : ""}" data-id="${p.id}">
+    <div class="n">${esc(p.name)}</div><div class="u">${esc(p.slug||"")}</div>
+    <div class="b">${g}</div>
+    <div class="bar"><i style="width:${Math.min(100,(p.escalation/5)*100)}%"></i></div></div>`;
+}
+function rail(){
+  const box = $("#list"), keep = box.scrollTop, t = TERM.toLowerCase();
+  const rows = (S.projects||[]).filter(p => {
+    if (t && !(p.name||"").toLowerCase().includes(t) &&
+        !(p.url||"").toLowerCase().includes(t)) return false;
+    if (FILT === "manual") return p.manual;
+    if (FILT === "live") return p.live;
+    if (FILT === "cash") return p.fund > 0;
+    if (FILT === "ready") return p.ready > 0;
+    if (FILT === "hits") return p.hits > 0;
+    if (FILT === "nodet") return !p.details_ok;
+    if (FILT === "un") return p.toolchain === "unknown";
+    if (FILT === "web") return p.web;
+    return true;
+  });
+  box.innerHTML = rows.length ? rows.map(row).join("") : `<div class="empty">nothing matches</div>`;
+  box.scrollTop = keep;
+  box.querySelectorAll(".t").forEach(e => e.onclick = () => select(+e.dataset.id));
+}
+const cur = () => ((S && S.projects) || []).find(p => p.id === SEL) || null;
+function select(id){ SEL = id; SINCE = 0; SIGHASH = ""; $("#dlog").innerHTML = ""; render(); }
+
+function head(){
+  const p = cur();
+  $("#pn").textContent = p ? p.name : "no target selected";
+  $("#pu").textContent = p ? p.url : "pick a target on the left, queue one above, or use + manual";
+  $("#dn").textContent = p ? p.name : "-";
+  const a = $("#acts");
+  if (!p){ a.innerHTML = ""; return; }
+  a.innerHTML = `<button class="pri" data-a="all">attack all</button>
+    <button data-a="recon">recon</button><button data-a="l1">L1</button>
+    <button data-a="l2">L2</button><button data-a="l3">L3</button><button data-a="l4">L4</button>
+    <button data-a="l5">L5</button><button class="dan" data-a="stop">stop</button>
+    <button data-a="restart">restart</button>
+    ${p.manual ? '<button class="pri" data-a="edit">edit manual</button>' : ""}
+    <select id="rk">${(S.repair_kinds||[]).map(k =>
+      `<option value="${esc(k)}">${esc(k)}</option>`).join("")}</select>
+    <button data-a="repair">repair</button>
+    <button class="gh" data-a="auto">auto ${p.auto ? "on" : "off"}</button>`;
+  a.querySelectorAll("button").forEach(b => b.onclick = () => act(b.dataset.a, p));
+}
+
+async function act(kind, p){
+  if (!p) return;
+  try{
+    if (kind === "all"){ await post("/api/attack", {pid:p.id}); to("full ladder queued"); }
+    else if (kind === "stop"){ await post("/api/stop", {pid:p.id}); to("stopping"); }
+    else if (kind === "restart"){
+      if (!confirm("purge and requeue this target?")) return;
+      await post("/api/restart", {pid:p.id}); SINCE = 0; $("#dlog").innerHTML = ""; to("restarted"); }
+    else if (kind === "repair"){ await post("/api/repair",
+      {pid:p.id, kind:($("#rk")||{}).value||"locked_files"}); to("repair queued"); }
+    else if (kind === "auto"){ await post("/api/auto", {pid:p.id, on:!p.auto}); }
+    else if (kind === "recon"){ await post("/api/attack", {pid:p.id, level:0}); }
+    else if (kind === "edit"){ return openManual(p.id); }
+    else { await post("/api/attack", {pid:p.id, level:+kind.slice(1)}); }
+    SIGHASH = ""; poll();
+  }catch(e){ to(e.message, true); }
+}
+
+async function pullLog(){
+  if (PAUSE || !SEL) return;
+  const rows = await get(`/api/log?pid=${SEL}&since=${SINCE}`);
+  if (!rows || !rows.length) return;
+  const box = $("#dlog"), bot = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
+  const f = ($("#dfilter").value||"").toLowerCase();
+  for (const r of rows){
+    SINCE = r.id;
+    if (f && !r.line.toLowerCase().includes(f)) continue;
+    if (ERRS && !/\b(fail|error|failed|crash|timeout|denied|traceback)\b/i.test(r.line)) continue;
+    const d = document.createElement("div"); d.className = "ln";
+    const c = /\b(fail|error|crash|traceback)\b/i.test(r.line) ? "e"
+      : /\b(warn|thin|skip|absent)\b/i.test(r.line) ? "w" : "";
+    d.innerHTML = `<span class="ts">${new Date(r.ts*1000).toLocaleTimeString()} </span>` +
+      `<span class="${c}">${esc(r.line)}</span>`;
+    box.appendChild(d);
+  }
+  while (box.childElementCount > 1200) box.firstChild.remove();
+  if (bot) box.scrollTop = box.scrollHeight;
+}
+
+function tabs(){
+  $("#tabs").innerHTML = TABS.map(t =>
+    `<button class="${t === TAB ? "on" : ""}" data-t="${t}">${t}</button>`).join("");
+  $("#tabs").querySelectorAll("button").forEach(b => b.onclick = () => {
+    TAB = b.dataset.t; tabs(); render(); });
+}
+
+async function render(){
+  const v = $("#view"), p = cur(); tabs();
+  try{
+    if (TAB === "board") return board(v);
+    if (!p){ v.innerHTML = `<div class="empty">select a target</div>`; return; }
+    const map = {overview, value, contract, plan, findings, readiness, report, methods,
+                 discovery, repairs, health: renderHealth};
+    return await map[TAB](v, p);
+  }catch(e){
+    v.innerHTML = `<div class="card bad"><b>render failed</b>
+      <div class="hint mono">${esc(e.message)}</div>
+      <div class="row" style="margin:10px 0 0"><button data-x="r">retry</button></div></div>`;
+    v.querySelector("[data-x=r]").onclick = render;
+  }
+}
+
+function board(v){
+  const ps = S.projects || [];
+  v.innerHTML = `<h2>all targets · ${ps.length}</h2>
+    <p class="hint" style="margin-bottom:12px">manual rows skip the detail gate and keep their
+    type locked. everything else is judged the same way.</p>` +
+    (ps.length ? `<table><thead><tr><th>target</th><th>source</th><th>details</th>
+    <th>type</th><th>money</th><th>status</th><th>ready</th><th>ready %</th><th></th>
+    </tr></thead><tbody>` + ps.map(x => `<tr>
+      <td><b>${esc(x.name)}</b><div class="u mono">${esc(x.slug)}</div></td>
+      <td>${x.manual ? '<span class="chip mut">manual</span>' : '<span class="chip">auto</span>'}</td>
+      <td>${x.details_ok ? '<span class="chip ok">yes</span>' : '<span class="chip bad">no</span>'}</td>
+      <td>${esc(x.toolchain)}${x.web ? ' <span class="chip ok">app</span>' : ''}</td>
+      <td>${x.fund ? `<span class="chip cash">${x.fund}</span>` : "—"}</td>
+      <td>${esc(x.status)}</td><td class="num">${x.ready||0}</td>
+      <td><span class="sbar"><i style="width:${x.readiness||0}%"></i></span>
+        <span class="num hint">${x.readiness||0}%</span></td>
+      <td><button data-g="${x.id}">open</button>
+        ${x.manual ? `<button data-e="${x.id}">edit</button>` : ""}
+        <button class="pri" data-s="${x.id}">start</button></td></tr>`).join("") +
+      `</tbody></table>` : `<div class="empty">no targets — queue a url or use + manual</div>`);
+  v.querySelectorAll("[data-g]").forEach(b => b.onclick = () => select(+b.dataset.g));
+  v.querySelectorAll("[data-e]").forEach(b => b.onclick = () => openManual(+b.dataset.e));
+  v.querySelectorAll("[data-s]").forEach(b => b.onclick = () => {
+    const p = S.projects.find(z => z.id === +b.dataset.s); if (!p) return;
+    SEL = p.id; act("all", p); });
+}
+
+async function overview(v, p){
+  const d = await get("/api/details?pid=" + p.id) || {};
+  v.innerHTML = `
+    ${p.manual ? `<div class="card ok"><b>manual project</b>
+      <div class="hint" style="margin-top:6px">details and type are yours. scope, tiers, poc
+      and channel still gate every finding.</div>
+      <div class="row" style="margin:9px 0 0"><button data-x="edit">edit</button>
+      <button data-x="release">release to discovery</button></div></div>` : ""}
+    ${!p.details_ok && !p.manual ? `<div class="card warn"><b>details not fetched</b>
+      <div class="hint" style="margin-top:6px">nothing is downloaded until the page and contract
+      exist. paste the brief or enter it by hand.</div></div>` : ""}
+    ${p.toolchain === "unknown" ? `<div class="card warn"><b>type unresolved</b>
+      <div class="hint" style="margin-top:6px">only language-agnostic methods run.</div></div>` : ""}
+    ${p.unjudged ? `<div class="card warn"><b>${p.unjudged} finding(s) never judged</b></div>` : ""}
+    <div class="grid">
+      <div class="st"><b class="num">${p.readiness||0}%</b><span>submission ready</span></div>
+      <div class="st"><b class="num">${p.fund||0}</b><span>fund findings</span></div>
+      <div class="st"><b class="num">${p.hits}</b><span>total findings</span></div>
+      <div class="st"><b class="num">${p.targets_n||0}</b><span>in scope</span></div>
+      <div class="st"><b class="num">${p.repairs}</b><span>repairs</span></div>
+    </div>
+    <div class="card"><b>${esc(p.status)}</b> · stage <span class="mono">${esc(p.stage||"—")}</span>
+      · L${p.escalation}/5 · attempt ${p.attempts} · cycle ${p.cycle}
+      <div class="hint" style="margin-top:6px">rank ${p.rank} · cap $${p.max}
+      ${p.tvl ? " · census " + (Number(p.tvl)/1e18).toFixed(4) + " ETH-eq" : ""}</div></div>
+    ${p.notes ? `<div class="card"><b>notes</b><pre class="rep">${esc(p.notes)}</pre></div>` : ""}
+    <div class="card"><b>type: ${esc(p.toolchain)}</b>
+      <div class="row" style="margin:10px 0 0">
+        <select id="tsel">${["auto","solidity","rust","go","python","js","php","ruby","java","c",
+          "web","unknown"].map(t => `<option value="${t}" ${
+          (!p.type_locked && t === "auto") || (p.type_locked && t === p.toolchain) ? "selected"
+          : ""}>${t}</option>`).join("")}</select>
+        <button data-x="type">set type</button></div></div>
+    <div class="card"><b>detail resolution</b>
+      <div class="hint" style="margin-top:6px">adapter
+        <span class="mono">${esc((d.details||{}).adapter||"none")}</span> ·
+        tier <span class="mono">${esc((d.details||{}).tier||"none")}</span></div>
+      ${d.reason ? `<pre class="rep" style="margin-top:8px">${esc(d.reason)}</pre>` : ""}
+      <div class="hint" style="margin-top:9px">paste the program text to fill scope, tiers, poc
+      and channel.</div>
+      <textarea id="paste" rows="6" style="margin-top:7px"></textarea>
+      <div class="row" style="margin:8px 0 0"><button class="pri" data-x="paste">parse paste</button>
+        <button data-x="recon">retry fetch</button></div>
+      <div id="pout" class="hint mono" style="margin-top:8px"></div></div>
+    <div class="row"><button class="pri" data-x="all">attack all</button>
+      <button data-x="contract">contract</button><button data-x="plan">plan</button>
+      <button class="dan" data-x="purge">purge data</button>
+      <button data-x="restart">restart</button><button data-x="locked_files">unlock git</button></div>`;
+  v.querySelectorAll("button").forEach(b => b.onclick = async () => {
+    const x = b.dataset.x;
+    if (x === "all" || x === "restart") return act(x, p);
+    if (x === "edit") return openManual(p.id);
+    if (x === "contract" || x === "plan"){ TAB = x; return render(); }
+    if (x === "type"){
+      await post("/api/type", {pid:p.id, toolchain:$("#tsel").value}).catch(e => to(e.message, true));
+      SIGHASH = ""; return poll(); }
+    if (x === "release"){
+      if (!confirm("drop the manual flag and let discovery own this target?")) return;
+      await post("/api/manual/clear", {pid:p.id}); SIGHASH = ""; return poll(); }
+    if (x === "paste"){
+      const t = $("#paste").value || "";
+      if (t.trim().length < 80) return to("paste more text", true);
+      try{ const r = await post("/api/paste", {pid:p.id, text:t});
+        to(`parsed ${r.assets} asset(s), ${r.tiers} tier(s)`, !r.ok); SIGHASH = ""; poll(); }
+      catch(e){ to(e.message, true); }
+      return; }
+    if (x === "purge"){
+      if (!confirm("drop findings, log and contract?")) return;
+      await post("/api/purge", {pid:p.id}); SINCE = 0; $("#dlog").innerHTML = "";
+      SIGHASH = ""; return poll(); }
+    await post("/api/repair", {pid:p.id, kind:x}).catch(e => to(e.message, true));
+    to("repair: " + x);
+  });
+}
+
+async function value(v, p){
+  const r = await get("/api/value?pid=" + p.id) || {value:""};
+  v.innerHTML = `<h2>value census</h2>
+    <div class="grid"><div class="st"><b class="num">${r.tvl ? (Number(r.tvl)/1e18).toFixed(4) : "0"}</b>
+      <span>eth-equivalent</span></div>
+      <div class="st"><b class="num">${p.targets_n||0}</b><span>in scope</span></div></div>
+    <pre class="rep">${esc(r.value || "no census yet")}</pre>
+    <div class="row"><button data-x="r">rerun</button></div>`;
+  v.querySelector("[data-x=r]").onclick = () => act("recon", p);
+}
+
+async function contract(v, p){
+  const pol = await get("/api/conditions?pid=" + p.id);
+  if (!pol || !p.cond_ok){
+    v.innerHTML = `<div class="empty">no contract parsed — run recon, paste, or enter manually</div>`;
+    return;
+  }
+  const ex = pol.exclusions || {}, poc = pol.poc || {}, sub = pol.submit || {};
+  v.innerHTML = `<h2>program contract</h2>
+    <div class="grid"><div class="st"><b>${esc(pol.scope_model)}</b><span>scope model</span></div>
+      <div class="st"><b class="num">${(pol.targets||[]).length}</b><span>targets</span></div>
+      <div class="st"><b>${poc.required ? "required" : "optional"}</b><span>poc</span></div></div>
+    <div class="card"><b>targets</b><table><thead><tr><th>address</th><th>chain</th><th>kind</th>
+      </tr></thead><tbody>${(pol.targets||[]).map(t => `<tr><td class="mono">${esc(t.address)}</td>
+      <td>${esc(t.chain)}</td><td>${esc(t.kind||"—")}</td></tr>`).join("") ||
+      `<tr><td colspan="3" class="hint">none</td></tr>`}</tbody></table></div>
+    <div class="card"><b>exclusions</b>
+      ${(ex.surfaces||[]).map(s => `<div class="chip bad" style="display:block">${esc(s)}</div>`)
+        .join("") || '<div class="hint">none</div>'}</div>
+    <div class="card"><b>submit</b>
+      <div class="hint">channel <b>${esc(sub.channel||"—")}</b> · address
+        <span class="mono">${esc(sub.address||"—")}</span></div></div>
+    <div class="card"><b>severity tiers</b><table><tbody>
+      ${(pol.severity||[]).map(r => `<tr><td class="sev sv-${esc(r.tier)}">${esc(r.tier)}</td>
+      <td class="mono">${esc(r.band||"—")}</td></tr>`).join("") ||
+      `<tr><td class="hint">none — the gate blocks everything</td></tr>`}</tbody></table></div>
+    <div class="card"><b>template</b>
+      <div class="hint">${esc((pol.template||[]).join(" / ")||"—")}</div></div>`;
+}
+
+async function plan(v, p){
+  const pl = await get("/api/plan?pid=" + p.id) || {levels:[]};
+  v.innerHTML = `<h2>attack plan</h2>
+    <p class="hint" style="margin-bottom:12px">type ${esc(pl.label||"?")} · poc
+    ${pl.poc_required ? "required" : "optional"} · threshold ${pl.threshold}</p>` +
+    pl.levels.map(l => `<div class="lvl ${l.applicable ? "" : "off"}">
+      <div class="n">L${l.level}</div><div class="x"><b>${esc(l.name)} · ${l.count}</b>
+      <span>${esc(l.note || (l.tools||[]).slice(0,8).join(", "))}</span></div>
+      <button ${l.applicable ? "" : "disabled"} data-l="${l.level}">run</button></div>`).join("");
+  v.querySelectorAll("[data-l]").forEach(b => b.onclick = async () => {
+    try{ await post("/api/attack", {pid:p.id, level:+b.dataset.l}); to("queued"); poll(); }
+    catch(e){ to(e.message, true); } });
+}
+
+async function findings(v, p){
+  const fs = await get("/api/findings?pid=" + p.id) || [];
+  const c = {}; fs.forEach(f => c[f.sev] = (c[f.sev]||0) + 1);
+  const fund = fs.filter(f => f.fund).length;
+  let shown = FSEV === "all" ? fs : FSEV === "fund" ? fs.filter(f => f.fund)
+    : fs.filter(f => f.sev === FSEV);
+  const order = "critical high medium low info".split(" ");
+  shown = shown.slice().sort((a,b) => {
+    const k = FSORT.k;
+    const av = k === "sev" ? order.indexOf(a.sev) : (a[k] ?? "");
+    const bv = k === "sev" ? order.indexOf(b.sev) : (b[k] ?? "");
+    return (av > bv ? 1 : av < bv ? -1 : 0) * FSORT.d; });
+  const ch = (id, l, n) => `<button class="${FSEV === id ? "on" : ""}" data-s="${id}">${l} ${n}</button>`;
+  v.innerHTML = `<h2>${fs.length} findings</h2>
+    <div class="row">${ch("all","all",fs.length)}${fund ? ch("fund","money",fund) : ""}
+      ${order.filter(s => c[s]).map(s => ch(s, s, c[s])).join("")}</div>
+    ${shown.length ? `<table><thead><tr><th class="s" data-k="sev">sev</th>
+      <th class="s" data-k="title">title</th><th>where</th><th class="s" data-k="score">score</th>
+      <th>state</th></tr></thead><tbody>` + shown.map(f => {
+        let bl = []; try{ bl = JSON.parse(f.blockers||"[]"); }catch{}
+        return `<tr class="${f.eligible ? "" : "dead"}">
+          <td class="sev sv-${esc(f.sev)}">${esc(f.sev)}</td>
+          <td>${f.fund ? '<span class="chip cash">$</span> ' : ""}${esc(f.title)}
+            <div class="hint mono">${esc(f.cls)}</div></td>
+          <td class="mono">${esc(f.file)}:${f.line}</td>
+          <td><span class="sbar"><i style="width:${f.score||0}%"></i></span>
+            <span class="num hint">${f.score||0}</span></td>
+          <td>${!f.judged ? '<span class="chip">unjudged</span>'
+            : bl.length ? bl.map(b => `<span class="chip bad">${esc(b)}</span>`).join("")
+            : '<span class="chip ok">ready</span>'}</td></tr>
+          <tr><td colspan="5" style="padding-top:0"><details><summary class="hint">evidence
+          </summary><pre class="rep">${esc(f.evidence)}</pre></details></td></tr>`; }).join("") +
+      `</tbody></table>` : `<div class="empty">no findings in this filter</div>`}`;
+  v.querySelectorAll("[data-s]").forEach(b => b.onclick = () => { FSEV = b.dataset.s; render(); });
+  v.querySelectorAll("th.s").forEach(t => t.onclick = () => {
+    const k = t.dataset.k; FSORT = {k, d: FSORT.k === k ? -FSORT.d : -1}; render(); });
+}
+
+async function readiness(v, p){
+  const r = await get("/api/readiness?pid=" + p.id) || {requirements:[]};
+  const deg = Math.round((r.score||0) * 3.6);
+  v.innerHTML = `<h2>submission readiness</h2>
+    <div class="row"><div class="ring"
+      style="background:conic-gradient(var(--ok) ${deg}deg,var(--line) ${deg}deg)">
+      <i class="num">${r.score||0}%</i></div>
+      <div><b class="num">${r.ready||0} ready</b>
+      <div class="hint">${r.total||0} total</div></div></div>
+    <div class="row"><button class="pri" data-x="poc">generate poc files</button>
+      <button data-x="rep">report</button></div>`;
+  v.querySelector("[data-x=poc]").onclick = async () => {
+    try{ await post("/api/poc", {pid:p.id}); to("written"); poll(); }
+    catch(e){ to(e.message, true); } };
+  v.querySelector("[data-x=rep]").onclick = () => { TAB = "report"; render(); };
+}
+
+async function report(v, p){
+  const r = await get("/api/report?pid=" + p.id), txt = (r && r.report) || "";
+  v.innerHTML = `<h2>report</h2>
+    <div class="row"><button data-x="c">copy</button><button data-x="d">download</button>
+      <button class="pri" data-x="l5">rebuild</button></div>
+    <pre class="rep">${esc(txt || "not written yet")}</pre>`;
+  v.querySelector("[data-x=c]").onclick = () =>
+    navigator.clipboard.writeText(txt).then(() => to("copied"), () => to("copy failed", true));
+  v.querySelector("[data-x=d]").onclick = () => {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([txt], {type:"text/markdown"}));
+    a.download = "report-" + (p.slug||p.id) + ".md"; a.click(); };
+  v.querySelector("[data-x=l5]").onclick = () => act("l5", p);
+}
+
+async function methods(v, p){
+  if (!TOOLS) TOOLS = await get("/api/tools") || [];
+  const langs = new Set([p.toolchain]);
+  const ok = t => t.langs.length === 0 || t.langs.some(l => langs.has(l)) || p.toolchain === "unknown";
+  const rows = TOOLS.slice().sort((a,b) => a.id.localeCompare(b.id));
+  v.innerHTML = `<h2>${rows.length} methods · ${TOOLS.filter(t => t.fund).length} fund</h2>
+    <table><thead><tr><th>id</th><th>method</th><th>class</th><th>sev</th><th>lvl</th>
+    <th></th></tr></thead><tbody>` + rows.map(t => `<tr style="${ok(t) ? "" : "opacity:.35"}">
+      <td class="mono">${esc(t.id)}</td>
+      <td>${t.fund ? '<span class="chip cash">$</span> ' : ""}${esc(t.name)}</td>
+      <td>${esc(t.cls)}</td><td class="sev sv-${esc(t.sev)}">${esc(t.sev)}</td>
+      <td>L${t.lvl}</td><td>${ok(t) ? `<button data-t="${esc(t.id)}">run</button>` : ""}</td>
+      </tr>`).join("") + `</tbody></table>`;
+  v.querySelectorAll("[data-t]").forEach(b => b.onclick = async () => {
+    try{ await post("/api/tool", {pid:p.id, id:b.dataset.t}); to(b.dataset.t + " queued"); poll(); }
+    catch(e){ to(e.message, true); } });
+}
+
+async function discovery(v){
+  const cat = await get("/api/catalog") || [];
+  const aud = await get("/api/discovery_audit") || [];
+  v.innerHTML = `<h2>seed catalog</h2>
+    ${cat.map((x,i) => `<div class="card"><b>${esc(x.name)}</b>
+      <div class="hint">$${x.max} · hint ${esc(x.toolchain)} · ${esc(x.url)}</div>
+      <div class="row" style="margin:8px 0 0"><button data-i="${i}">queue</button></div></div>`
+      ).join("") || '<div class="empty">catalog empty</div>'}
+    <h2 style="margin-top:18px">rejected urls · ${aud.length}</h2>
+    ${aud.length ? `<table><thead><tr><th>url</th><th>reason</th></tr></thead><tbody>
+      ${aud.slice(0,120).map(a => `<tr><td class="mono">${esc(a.url)}</td>
+      <td class="hint">${esc(a.why)}</td></tr>`).join("")}</tbody></table>`
+      : '<div class="empty">none</div>'}`;
+  v.querySelectorAll("[data-i]").forEach(b => b.onclick = async () => {
+    const x = cat[+b.dataset.i];
+    try{ await post("/api/add", {url:x.url, name:x.name}); to("queued"); poll(); }
+    catch(e){ to(e.message, true); } });
+}
+
+async function repairs(v){
+  const r = await get("/api/repairs") || [];
+  v.innerHTML = `<h2>${r.length} repair events</h2>` +
+    (r.length ? `<table><thead><tr><th>time</th><th>pid</th><th>kind</th><th>detail</th></tr>
+      </thead><tbody>${r.map(x => `<tr><td class="mono">${
+      new Date(x.ts*1000).toLocaleTimeString()}</td><td class="num">${x.pid}</td>
+      <td>${esc(x.kind)}</td><td class="hint">${esc(x.detail)}</td></tr>`).join("")}
+      </tbody></table>` : `<div class="empty">no repairs yet</div>`);
+}
+
+async function renderHealth(v){
+  const h = await get("/api/health") || {};
+  v.innerHTML = `<h2>engine health</h2>
+    <div class="grid">
+      <div class="st"><b class="num">${h.uptime||0}s</b><span>uptime</span></div>
+      <div class="st"><b class="num">${h.queue||0}</b><span>queue depth</span></div>
+      <div class="st"><b class="num">${(h.live||[]).length}</b><span>live jobs</span></div>
+      <div class="st"><b class="num">${h.db_ms||0}ms</b><span>db latency</span></div>
+      <div class="st"><b class="num">${h.net_penalty||0}s</b><span>net penalty</span></div>
+      <div class="st"><b class="num">${h.threads||0}</b><span>threads</span></div>
+    </div>
+    <div class="card"><b>flags</b><div class="hint" style="margin-top:7px">
+      discovery ${h.discover ? "on" : "off"} · discovering ${h.discovering ? "yes" : "no"} ·
+      workers ${h.workers||0} · live ${(h.live||[]).join(", ")||"—"}</div></div>
+    <div class="row"><button data-x="r">clear stop flag</button>
+      <button class="dan" data-x="s">stop all</button></div>`;
+  v.querySelector("[data-x=r]").onclick = () => post("/api/reset").then(() => to("cleared"));
+  v.querySelector("[data-x=s]").onclick = () => post("/api/stop", {}).then(() => to("signalled"));
+}
+
+async function openManual(pid){
+  MPID = pid || 0;
+  $("#mtitle").textContent = pid ? "edit manual program" : "manual program";
+  $("#merr").textContent = ""; $("#prev").textContent = "nothing parsed yet";
+  ["mparse","mname","murl","mmax","mscope","tc","th","tm","tl","ti","maddr","mexcl","mnotes"]
+    .forEach(k => $("#" + k).value = "");
+  $("#mtype").value = "unknown"; $("#mpoc").value = "1"; $("#mchan").value = "";
+  $("#mrank").value = 60;
+  if (!pid){
+    const ps = await get("/api/manual/presets") || [];
+    $("#presets").innerHTML = ps.map(p =>
+      `<button data-p="${esc(p.id)}">${esc(p.label)}</button>`).join("");
+    $("#presets").querySelectorAll("button").forEach(b => b.onclick = () => {
+      const p = ps.find(x => x.id === b.dataset.p);
+      $("#mtype").value = p.toolchain; $("#mpoc").value = p.poc ? "1" : "0";
+      $("#mchan").value = p.submit;
+      for (const t of p.tiers){
+        if (t.tier === "critical") $("#tc").value = t.max;
+        if (t.tier === "high") $("#th").value = t.max;
+        if (t.tier === "medium") $("#tm").value = t.max;
+        if (t.tier === "low") $("#tl").value = t.max;
+        if (t.tier === "info") $("#ti").value = t.max;
+      }
+      preview();
+    });
+  } else {
+    $("#presets").innerHTML = "";
+    const d = await get("/api/manual?pid=" + pid) || {};
+    $("#mname").value = d.name || ""; $("#murl").value = d.url || "";
+    $("#mtype").value = d.toolchain || "unknown"; $("#mmax").value = d.max || "";
+    $("#mrank").value = d.rank || 60; $("#mscope").value = (d.scope||[]).join("\n");
+    $("#mpoc").value = d.poc ? "1" : "0"; $("#mchan").value = d.channel || "";
+    $("#maddr").value = d.address || ""; $("#mexcl").value = (d.exclusions||[]).join("\n");
+    $("#mnotes").value = d.notes || "";
+    for (const t of d.tiers || []){
+      if (t.tier === "critical") $("#tc").value = t.max;
+      if (t.tier === "high") $("#th").value = t.max;
+      if (t.tier === "medium") $("#tm").value = t.max;
+      if (t.tier === "low") $("#tl").value = t.max;
+      if (t.tier === "info") $("#ti").value = t.max;
+    }
+  }
+  $("#scrim").classList.add("on");
+  $("#mname").focus();
+  preview();
+}
+function closeManual(){ $("#scrim").classList.remove("on"); }
+
+function collect(draft){
+  const tiers = [["critical","tc"],["high","th"],["medium","tm"],["low","tl"],["info","ti"]]
+    .filter(([, id]) => $("#" + id).value !== "")
+    .map(([t, id]) => ({tier:t, max:+$("#" + id).value || 0}));
+  return {pid:MPID, name:$("#mname").value.trim(), url:$("#murl").value.trim(),
+    toolchain:$("#mtype").value, max:+$("#mmax").value || 0, rank:+$("#mrank").value || 60,
+    scope:$("#mscope").value.split("\n").map(s => s.trim()).filter(Boolean),
+    tiers, poc:$("#mpoc").value === "1", channel:$("#mchan").value,
+    address:$("#maddr").value.trim(),
+    exclusions:$("#mexcl").value.split("\n").map(s => s.trim()).filter(Boolean),
+    notes:$("#mnotes").value.trim(), draft:!!draft};
+}
+function preview(){
+  const d = collect(false);
+  $("#prev").textContent = [`name: ${d.name || "—"}`, `url: ${d.url || "—"}`,
+    `type: ${d.toolchain}`, `max: $${d.max}`, `rank: ${d.rank}`,
+    `poc: ${d.poc ? "required" : "optional"}`,
+    `channel: ${d.channel || "—"} ${d.address}`, `assets: ${d.scope.length}`,
+    ...d.scope.slice(0, 6).map(s => "  · " + s),
+    `tiers: ${d.tiers.map(t => t.tier + "<=" + t.max).join(", ") || "—"}`,
+    `exclusions: ${d.exclusions.length}`].join("\n");
+}
+["mname","murl","mtype","mmax","mrank","mscope","tc","th","tm","tl","ti","mpoc","mchan",
+ "maddr","mexcl","mnotes"].forEach(k => {
+  $("#" + k).addEventListener("input", preview);
+  $("#" + k).addEventListener("change", preview);
+});
+
+$("#mparsebtn").onclick = async () => {
+  const t = $("#mparse").value || "";
+  if (t.trim().length < 40) return to("paste more text", true);
+  const d = await post("/api/manual/parse", {text:t}).catch(() => null);
+  if (!d) return to("parse failed", true);
+  $("#mname").value = d.name || $("#mname").value;
+  $("#murl").value = d.url || $("#murl").value;
+  $("#mtype").value = d.toolchain || $("#mtype").value;
+  $("#mmax").value = d.max || $("#mmax").value;
+  $("#mscope").value = (d.scope||[]).join("\n");
+  $("#mexcl").value = (d.exclusions||[]).join("\n");
+  $("#mpoc").value = d.poc ? "1" : "0";
+  $("#mchan").value = d.channel || "";
+  $("#maddr").value = d.address || "";
+  for (const t2 of d.tiers || []){
+    if (t2.tier === "critical") $("#tc").value = t2.max;
+    if (t2.tier === "high") $("#th").value = t2.max;
+    if (t2.tier === "medium") $("#tm").value = t2.max;
+    if (t2.tier === "low") $("#tl").value = t2.max;
+    if (t2.tier === "info") $("#ti").value = t2.max;
+  }
+  preview(); to("parsed — check every field before saving");
+};
+
+$("#msave").onclick = async () => {
+  $("#merr").textContent = "";
+  try{
+    const r = await post("/api/manual", collect(false));
+    closeManual(); to("saved and queued"); SIGHASH = ""; await poll();
+    if (r.id){ select(r.id); await post("/api/attack", {pid:r.id}); }
+  }catch(e){ $("#merr").textContent = e.message; }
+};
+$("#mdraft").onclick = async () => {
+  $("#merr").textContent = "";
+  try{ await post("/api/manual", collect(true)); closeManual(); to("draft saved");
+    SIGHASH = ""; poll(); }
+  catch(e){ $("#merr").textContent = e.message; }
+};
+$("#mbulk").onclick = async () => {
+  const text = prompt("one program per line:\nname | url | type | max | asset,asset");
+  if (!text) return;
+  try{ const r = await post("/api/manual/bulk", {text});
+    to(r.added + " added, " + r.rejected.length + " rejected", r.rejected.length > 0);
+    if (r.rejected.length) $("#merr").textContent = r.rejected
+      .map(x => `line ${x[0]}: ${x[2]}`).join(" · ");
+    SIGHASH = ""; poll(); }
+  catch(e){ $("#merr").textContent = e.message; }
+};
+$("#mx").onclick = closeManual;
+$("#scrim").onclick = e => { if (e.target.id === "scrim") closeManual(); };
+$("#newman").onclick = () => openManual(0);
+
+$("#add").onclick = async () => {
+  const u = $("#q").value.trim(); if (!u) return;
+  try{ await post("/api/add", {url:u}); to("queued"); $("#q").value = ""; SIGHASH = ""; poll(); }
+  catch(e){ to(e.message, true); } };
+$("#q").onkeydown = e => { if (e.key === "Enter") $("#add").click(); };
+$("#all").onclick = () => post("/api/start_all").then(() => { to("queued"); poll(); });
+$("#stop").onclick = () => post("/api/stop", {}).then(() => { to("signalled"); poll(); });
+$("#fund").onclick = () => post("/api/fundonly", {on:!(S && S.fund_only)})
+  .then(() => { SIGHASH = ""; poll(); });
+$("#purgeall").onclick = () => {
+  if (!confirm("purge derived data for every target?")) return;
+  post("/api/purge", {}).then(() => { to("cleared"); SINCE = 0; $("#dlog").innerHTML = "";
+    SIGHASH = ""; poll(); }); };
+$("#disc").onclick = async () => {
+  try{ const r = await get("/api/discover?n=5"); to((r ? r.added : 0) + " added"); poll(); }
+  catch(e){ to("discover failed", true); } };
+$("#dpause").onclick = () => { PAUSE = !PAUSE; $("#dpause").classList.toggle("on", PAUSE);
+  $("#dpause").textContent = PAUSE ? "resume" : "pause"; };
+$("#derr").onclick = () => { ERRS = !ERRS; $("#derr").classList.toggle("on", ERRS);
+  $("#dlog").innerHTML = ""; SINCE = 0; };
+$("#dfilter").oninput = () => { $("#dlog").innerHTML = ""; SINCE = 0; };
+$("#ddl").onclick = async () => {
+  if (!SEL) return;
+  const rows = await get(`/api/log?pid=${SEL}&since=0`) || [];
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([rows.map(r => r.line).join("\n")], {type:"text/plain"}));
+  a.download = "log-" + SEL + ".txt"; a.click(); };
+$("#dmin").onclick = () => { DOCK = !DOCK; $("#dock").classList.toggle("min", !DOCK);
+  $("#dmin").textContent = DOCK ? "collapse" : "expand"; };
+$("#rs").oninput = e => { TERM = e.target.value; rail(); };
+document.querySelectorAll("#rfilt button").forEach(b => b.onclick = () => {
+  FILT = b.dataset.f;
+  document.querySelectorAll("#rfilt button").forEach(x => x.classList.toggle("on", x === b));
+  rail(); });
+document.addEventListener("keydown", e => {
+  if ($("#scrim").classList.contains("on")){
+    if (e.key === "Escape") closeManual();
+    return; }
+  if (["INPUT","TEXTAREA","SELECT"].includes(e.target.tagName)) return;
+  if (e.key === "/"){ e.preventDefault(); $("#q").focus(); return; }
+  if (e.key === "n"){ e.preventDefault(); openManual(0); return; }
+  const p = cur();
+  if (e.key === "a" && p) act("all", p);
+  if (e.key === "s" && p) act("stop", p);
+  if (e.key === "r" && p) act("restart", p);
+  if (e.key === "j" || e.key === "k"){
+    const ps = S ? S.projects : [], i = ps.findIndex(x => x.id === SEL);
+    const n = e.key === "j" ? Math.min(ps.length-1, i+1) : Math.max(0, i-1);
+    if (ps[n]) select(ps[n].id); }
+});
+
+tabs(); poll(); setInterval(poll, 2000);
+</script>
+</html>
